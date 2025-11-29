@@ -31,3 +31,4 @@ go.work.sum
 # .idea/
 # .vscode/
 Learning_Go/wiki
+Learning_Go/*.txt
