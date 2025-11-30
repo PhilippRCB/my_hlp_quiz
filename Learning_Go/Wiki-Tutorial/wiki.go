@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 
 var templates = template.Must(template.ParseFiles("edit.html", "view.html"))
 var validPath = regexp.MustCompile("^/(edit|save|view)/([a-zA-Z0-9]+)$")
+var pageLinker = regexp.MustCompile(`\[([a-zA-Z0-9]+)\]`)
 
 type Page struct {
 	Title string
@@ -37,22 +39,14 @@ func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
 	}
 }
 
-func getTitle(w http.ResponseWriter, r *http.Request) (string, error) {
-	m := validPath.FindStringSubmatch(r.URL.Path)
-	if m == nil {
-		http.NotFound(w, r)
-		return "", http.ErrNoLocation
-	}
-	return m[2], nil
-}
-
 func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
 	p, err := loadPage(title)
 	if err != nil {
 		http.Redirect(w, r, "/edit/"+title, http.StatusFound)
 		return
 	}
-	renderTemplate(w, "view", p)
+	p.Body = []byte(pageLinker.ReplaceAllString(string(p.Body), "<a href='/view/$1'>[$1]</a>"))
+	fmt.Fprintf(w, "<h1>%s</h1><p>[<a href='/edit/%s'>edit</a>]</p><div>%s</div>", p.Title, p.Title, p.Body)
 }
 
 func editHandler(w http.ResponseWriter, r *http.Request, title string) {
