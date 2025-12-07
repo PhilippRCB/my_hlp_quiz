@@ -1,0 +1,5 @@
+{
+    "spring.initializr.defaultGroupId": "hlp_quiz",
+    "spring.initializr.defaultLanguage": "Java",
+    "java.configuration.updateBuildConfiguration": "interactive"
+}
